@@ -20,3 +20,5 @@ wavernn.utils.dsp
 wavernn.models.fatchord_version
 wavernn.utils.paths
 wavernn.utils.display
+
+conda activate py36

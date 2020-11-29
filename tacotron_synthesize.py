@@ -144,6 +144,35 @@ class Synthesizer:
         return pred_mel_path, alignment_path
 
 
+def tacotron(text: str, clearDir=False):
+    start = time.time()
+
+    synth = Synthesizer()
+
+    ckpt_path = 'logs-Tacotron-2/taco_pretrained'
+    checkpoint_path = tf.train.get_checkpoint_state(
+        ckpt_path).model_checkpoint_path
+
+    synth.load(checkpoint_path, hparams)
+    print('>>>\n\t成功读取模型\n>>>')
+
+    out_dir = os.path.join(cwd, 'tacotron_inference_output')
+    if clearDir and os.path.exists(out_dir):
+        shutil.rmtree(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
+
+    pyin, text = get_pyin(text)
+
+    m = hashlib.md5()
+    m.update(text.encode('utf-8'))
+    idx = m.hexdigest()
+    step = checkpoint_path.split('/')[-1].split('-')[-1].strip()
+
+    pred_mel_path, alignment_path = synth.synthesize(pyin, out_dir, idx, step)
+
+    return checkpoint_path, idx, time.time() - start
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--text', default='', help='text to synthesis.')
